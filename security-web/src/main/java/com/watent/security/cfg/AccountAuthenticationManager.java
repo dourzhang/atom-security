@@ -10,14 +10,15 @@ public class AccountAuthenticationManager implements AuthenticationManager {
     public Authentication authenticate(Authentication auth) throws AuthenticationException {
         AccountUserDetails accountUserDetails = new AccountUserDetails(getAccount());
 
-        return new UsernamePasswordAuthenticationToken(auth.getName(),
+        return new UsernamePasswordAuthenticationToken(accountUserDetails.getId(),
                 auth.getCredentials(), accountUserDetails.getAuthorities());
     }
 
     private Account getAccount() {
         Account account = new Account();
-        account.setId(account.getId());
-        account.setNickName(account.getNickName());
+        account.setId(1001L);
+        account.setNickName("administer");
+        account.setUsername("admin");
         account.setAuthority("ROLE_ADMIN,ROLE_ANALYZE");
         account.setCreatedAt(account.getCreatedAt());
         account.setUpdatedAt(account.getUpdatedAt());

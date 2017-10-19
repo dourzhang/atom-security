@@ -1,5 +1,6 @@
 package com.watent.security.cfg;
 
+import com.watent.security.filter.AccountFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
@@ -27,11 +29,14 @@ public class WebSecurityConfig {
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                    .antMatchers("/account/login", "/home/**", "/","/login")
+                    .antMatchers("/account/login", "/home/**", "/", "/login")
                     .permitAll()
                     .antMatchers("/hello").hasRole("ADMIN")
                     .and()
                     .httpBasic();
+
+            http.addFilterAfter(new AccountFilter(), FilterSecurityInterceptor.class);
+
         }
     }
 
@@ -80,7 +85,7 @@ public class WebSecurityConfig {
 
     @Bean
     public RememberMeServices rememberMeServices() {
-        return new TokenBasedRememberMeServices("key",userDetailsService);
+        return new TokenBasedRememberMeServices("key", userDetailsService);
     }
 
     @Autowired
