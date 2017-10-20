@@ -1,6 +1,6 @@
 package com.watent.security.cfg;
 
-import com.watent.security.filter.AccountFilter;
+import com.watent.log.filter.AccountFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +23,12 @@ public class WebSecurityConfig {
     @Resource
     private UserDetailsService userDetailsService;
 
+    @Resource
+    private AccountFilter accountFilter;
+
     @Configuration
     @Order(1)
-    public static class ApiWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+    public class ApiWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
@@ -35,13 +38,13 @@ public class WebSecurityConfig {
                     .and()
                     .httpBasic();
 
-            http.addFilterAfter(new AccountFilter(), FilterSecurityInterceptor.class);
+            http.addFilterAfter(accountFilter, FilterSecurityInterceptor.class);
 
         }
     }
 
     @Configuration
-    public static class FormLoginWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+    public class FormLoginWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
