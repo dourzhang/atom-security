@@ -1,4 +1,4 @@
-package com.watent.security.cfg;
+package com.watent.security.controller;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;

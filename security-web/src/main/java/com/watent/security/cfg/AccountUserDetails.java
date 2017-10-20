@@ -1,5 +1,6 @@
 package com.watent.security.cfg;
 
+import com.watent.security.controller.Account;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;

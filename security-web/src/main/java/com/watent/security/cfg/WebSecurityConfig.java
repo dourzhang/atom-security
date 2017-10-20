@@ -1,10 +1,10 @@
 package com.watent.security.cfg;
 
-import com.watent.log.filter.AccountFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.watent.log.filter.LogFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,63 +18,52 @@ import org.springframework.security.web.authentication.rememberme.TokenBasedReme
 import javax.annotation.Resource;
 
 @EnableWebSecurity
+@ConfigurationProperties
 public class WebSecurityConfig {
 
     @Resource
     private UserDetailsService userDetailsService;
 
     @Resource
-    private AccountFilter accountFilter;
+    private LogFilter logFilter;
+
+    @Value("${atom.login.url}")
+    private String loginUrl;
+
+    @Value("${atom.log.key}")
+    private String key;
+
 
     @Configuration
-    @Order(1)
     public class ApiWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                    .antMatchers("/account/login", "/home/**", "/", "/login")
+                    .antMatchers("/to-login", "/login/**", "/to-login/**", "/home/**", "/").permitAll()
+                    .antMatchers("/**").hasRole("ADMIN")
+                    .and()
+                    .httpBasic()
+                    .and()
+                    .formLogin()
+                    .loginPage(loginUrl)
+                    .and()
+                    .logout()
                     .permitAll()
-                    .antMatchers("/hello").hasRole("ADMIN")
                     .and()
-                    .httpBasic();
+                    .exceptionHandling().accessDeniedHandler(accountAccessDeniedHandler());
 
-            http.addFilterAfter(accountFilter, FilterSecurityInterceptor.class);
 
+            http.addFilterAfter(logFilter, FilterSecurityInterceptor.class);
         }
     }
 
-    @Configuration
-    public class FormLoginWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.authorizeRequests()
-                    .anyRequest().authenticated()
-                    .and()
-                    .formLogin();
-        }
+    @Resource
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.inMemoryAuthentication()
+//                .withUser("admin").password("admin").roles("USER");
+        auth.userDetailsService(userDetailsService);
     }
-
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http.authorizeRequests()
-//                .antMatchers("/", "/home").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .permitAll();
-//    }
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-//        manager.createUser(User.withUsername("admin").password("admin").roles("USER").build());
-//        return manager;
-//    }
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -91,11 +80,9 @@ public class WebSecurityConfig {
         return new TokenBasedRememberMeServices("key", userDetailsService);
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.inMemoryAuthentication()
-//                .withUser("admin").password("admin").roles("USER");
-        auth.userDetailsService(userDetailsService);
+    @Bean
+    public AccountAccessDeniedHandler accountAccessDeniedHandler() {
+        return new AccountAccessDeniedHandler();
     }
 
 }

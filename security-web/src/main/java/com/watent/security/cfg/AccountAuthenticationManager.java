@@ -1,5 +1,6 @@
 package com.watent.security.cfg;
 
+import com.watent.security.controller.Account;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

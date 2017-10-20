@@ -13,6 +13,13 @@ management:
   security:
     enabled: false
 
+info:
+  account:
+    login:
+      url: http://localhost:8080/to-login
+
 atom:
   log:
     key: account
+  login:
+    url: http://localhost:8080/to-login
